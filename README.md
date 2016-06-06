@@ -10,4 +10,11 @@ A few templates have been built in you can select from, and hit the Draw It butt
 
 If you want to create a new template, open the templates.js file and you will find it well commented and easy to understand.
 
-The end.
+Examples
+---
+
+### ATTiny13 
+![ATTiny13 Example](https://cdn.rawgit.com/sleemanj/ArduinoOrientedChipPinoutCreator/master/13.jpg)
+
+### ATMega328 QFP/MLF32
+![ATMega328 Example](https://cdn.rawgit.com/sleemanj/ArduinoOrientedChipPinoutCreator/master/328.jpg)
