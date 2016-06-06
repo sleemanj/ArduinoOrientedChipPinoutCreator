@@ -1,0 +1,616 @@
+<html>
+  <head>
+    <title>PinMap</title>
+    <script type="text/javascript" src="core.js"></script>
+    <script type="text/javascript" src="more.js"></script>
+    <script type="text/javascript" src="gogo.js"></script>
+    <script type="text/javascript" src="templates.js"></script>
+    
+    <script type="text/javascript">
+      
+      
+      
+      function drawChip(chip)
+      {
+        function drawPinLabels(pin, pinLabels, pinNumberPrefix = '')
+        {
+          var label = null;
+          if(pinLabels.constructor == Array)
+          {
+            if(pinLabels.lastIndexOf(pin) != -1)
+            {                
+              label = (new Element('span')).set('text', pinNumberPrefix=='~' ? '~' :( pinNumberPrefix+pinLabels.lastIndexOf(pin)));
+            }                
+          }
+          else
+          {    
+            (new Hash(pinLabels)).each(function(identpin, ident){                
+              if((identpin.constructor == Array && identpin.lastIndexOf(pin) != -1) || identpin == pin)
+              {
+                var text = ident;
+                if(identpin.constructor == Array && ident == 'Interrupt')
+                {
+                  text = 'INT'+identpin.lastIndexOf(pin);
+                }
+                
+                if(label)
+                {
+                  label.set('text', label.get('text') + ', ' + text);
+                }
+                else
+                {
+                  label = (new Element('span')).set('text', text);
+                }
+                label.addClass(ident);
+              }
+            });                
+          }
+          
+          var cell = new Element('td').addClass('pin'+pin).addClass('pin');              
+          if(label)
+          {
+            cell.adopt((new Element('div')).adopt(label));
+          }
+          
+          return cell;
+        }
+      
+       // This will hold the labels for each pin in the order
+        // from farthest away from the package, to the nearest 
+        // to the package (Interrupt to PRC) and will include the "leg"
+        var labelsByPin = [ ];
+        
+        for(var i = 1; i <= chip.Pins; i++) 
+        {      
+          // This is a temporary element so we can do some DOM query while building
+          var row = new Element('tr');
+              row.adopt(new Element('td')); // Temporary
+          // Left Side, from outside to inside
+          // row.adopt(drawPinLabels(i, chip.Interrupt, 'INT').addClass('Interrupt'));
+          
+          (new Hash(chip.Peripherals)).each(function(pPins, periphName){
+            drawPinLabels(i,pPins).addClass(periphName).inject(row.firstChild, 'after');
+          });              
+          row.getElement('td').destroy();
+          
+          row.adopt(drawPinLabels(i, chip.Analog, 'A').addClass('Analog'));
+          row.adopt(drawPinLabels(i, chip.Digital).addClass('Digital'));
+          row.adopt(drawPinLabels(i, chip.PWM, '~').addClass('PWM'));
+          row.adopt(drawPinLabels(i, chip.PRC).addClass('PRC'));
+          
+          if(row.getElement('td.pin'+i+' span.Reset, td.pin'+i+' span.XTAL1, td.pin'+i+' span.XTAL2'))
+          {
+            row.getElements('td.pin'+i).each(function(j){ if(!j.getElement('.Reset,.XTAL1,.XTAL2'))  j.addClass('Obscured');});
+          }
+          
+          row.adopt((new Element('td')).addClass('leg').adopt((new Element('div')).adopt((new Element('span')).set('text', i))));
+          
+          labelsByPin[i] = row.getChildren('td');          
+        }
+        
+        switch(chip.Package)
+        {
+        
+        
+         case '4SIDED':
+          // We build 1 table for the Horizontal pins
+          // then another the same (except without label) for the 
+          // Vertical pins
+          // The tables should end up being the same size
+          // position the vertical one on top of the horizontal and rotate 90 degrees
+          
+          // Build the Horizontal
+          var rows = [ ];            
+          for(var i = 1; i <= chip.Pins/4; i++)
+          { 
+            var row = new Element('tr');
+            
+            // Left Side, from outside to inside
+            for(var j = 0; j < labelsByPin[i].length; j++)
+            {
+              row.adopt(labelsByPin[i][j].addClass('left'));
+            }
+                          
+            // Right side, from inside to outside
+            for(var j = labelsByPin[chip.Pins+1-(chip.Pins/4)-i].length-1; j >= 0; j--)
+            {
+              row.adopt(labelsByPin[chip.Pins+1-(chip.Pins/4)-i][j].addClass('right'));
+            }
+            
+            rows[rows.length] = row;
+          }
+          
+          var tbody = new Element('tbody');
+          
+          // Above L+R Pins/Top of package
+          var tr = new Element('tr');
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          tr.adopt((new Element('td', {colSpan: chip.Pins/4, rowSpan: rows.length+1})).addClass('css-'+chip.Package + '-outline').addClass('ic-body').set('text', chip.Name));
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          
+          // L+R Pins Themselves
+          tbody.adopt(tr);
+          for(var i = 0; i < rows.length; i++)
+          {
+            tbody.adopt(rows[i]);
+          }
+          
+          // Below L+R Pins/Bottom of package
+          var tr = new Element('tr');
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));          
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          
+          var table = (new Element('table')).addClass('pinout');
+          table.adopt(tbody);
+          document.getElement('#output').adopt(table);
+          //table.getElement('.ic-body').setStyle('width', table.getElement('.ic-body').getSize().y);
+          
+          var HTable = table;
+          
+          // Build the Vertical
+          
+          var rows = [ ];            
+          for(var i = 1+(chip.Pins/4); i <= chip.Pins/4+chip.Pins/4; i++)
+          { 
+            var row = new Element('tr');
+            
+            // Bottom (aka Left with -90 degree rotation) Side, from outside to inside
+            for(var j = 0; j < labelsByPin[i].length; j++)
+            {
+              row.adopt(labelsByPin[i][j].addClass('left'));
+            }
+                          
+            // Right side (aka Right with -90 degree rotation), from inside to outside
+            var oppositePin = chip.Pins - (i-1-(chip.Pins/4));
+            for(var j = labelsByPin[oppositePin].length-1; j >= 0; j--)
+            {
+              row.adopt(labelsByPin[oppositePin][j].addClass('right'));
+            }
+            
+            rows[rows.length] = row;
+          }
+          
+          var tbody = new Element('tbody');
+          
+          // Above L+R Pins/Top of package
+          var tr = new Element('tr');
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          tr.adopt((new Element('td', {colSpan: chip.Pins/4, rowSpan: rows.length+3})).addClass('css-'+chip.Package + '-outline').addClass('ic-body').set('text', chip.Name));
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          
+          // L+R Pins Themselves
+          tbody.adopt(tr);
+          for(var i = 0; i < rows.length; i++)
+          {
+            tbody.adopt(rows[i]);
+          }
+          
+          // Below L+R Pins/Bottom of package
+          var tr = new Element('tr');
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));          
+          tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+          tbody.adopt(tr);
+          
+          var table = (new Element('table')).addClass('pinout');
+          table.adopt(tbody);
+          document.getElement('#output').adopt(table);
+          //table.getElement('.ic-body').setStyle('width', table.getElement('.ic-body').getSize().y);
+          var VTable = table;
+          VTable.id = 'VTable';
+          
+          // Set both H and V table ic body to the same width/height
+          var size = Math.max( HTable.getElement('.ic-body').getSize().y,
+                               HTable.getElement('.ic-body').getSize().y,
+                               VTable.getElement('.ic-body').getSize().y,
+                               VTable.getElement('.ic-body').getSize().y) -25;
+          
+         
+          HTable.getElement('.ic-body').setStyles({width: size});
+          VTable.getElement('.ic-body').setStyles({width: size});
+          VTable.setStyle('width', VTable.getSize().x);
+          
+         console.log(VTable.getSize());
+          
+          // Overlay the VTable on top of the HTable
+          document.getElement('#output').setStyle('position', 'relative');
+          
+          if(chip.VerticalPinsOffset)
+          {
+            table.setStyles({position: 'absolute', top: chip.VerticalPinsOffset.top, left: chip.VerticalPinsOffset.left });
+          }
+          else
+          {
+            // This seems to work for 32 and 28 at least currently
+            table.setStyles({position: 'absolute', top: '-5px', left: '-52px' });            
+          }
+          
+          // Rotate it
+          VTable.setStyles({transform: 'rotate(270deg)'});
+          
+          // Hide the center
+          VTable.getElement('.ic-body').setStyle('visibility', 'hidden');
+          
+          // Add margin to the output frame so everything is in view.
+          if(chip.VerticalPinsMargin)
+          {
+            document.getElement('#output').setStyles({'margin-top': chip.VerticalPinsMargin.top, 'margin-bottom': chip.VerticalPinsMargin.bottom });
+          }
+          else
+          {
+            document.getElement('#output').setStyles({ 'margin-top': (VTable.getSize().x-size+10)/2,  'margin-bottom': (VTable.getSize().x-size+10)/2 });
+          }
+          
+          
+          document.getElement('#key').set('width', HTable.getSize().x);  
+         // document.getElement('.ic-body').set('height', document.getElement('.ic-body').getSize().x);
+          break;               
+          
+          case '2SIDED':
+          case 'SOIC':
+          case 'DIP':
+          {
+            var rows = [ ];            
+            for(var i = 1; i <= chip.Pins/2; i++)
+            { 
+              var row = new Element('tr');
+              
+              // Left Side, from outside to inside
+              for(var j = 0; j < labelsByPin[i].length; j++)
+              {
+                row.adopt(labelsByPin[i][j].addClass('left'));
+              }
+                            
+              // Right side, from inside to outside
+              for(var j = labelsByPin[chip.Pins+1-i].length-1; j >= 0; j--)
+              {
+                row.adopt(labelsByPin[chip.Pins+1-i][j].addClass('right'));
+              }
+              
+              rows[rows.length] = row;
+            }
+            
+            var tbody = new Element('tbody');
+            
+            // Above Pins
+            var tr = new Element('tr');
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            tr.adopt((new Element('td', {rowSpan: rows.length+2})).addClass('css-'+chip.Package + '-outline').addClass('ic-body').set('text', chip.Name));
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            
+            // Pins Themselves
+            tbody.adopt(tr);
+            for(var i = 0; i < rows.length; i++)
+            {
+              tbody.adopt(rows[i]);
+            }
+            
+            // Below Pins
+            var tr = new Element('tr');
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));          
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            
+            var table = (new Element('table')).addClass('pinout');
+            table.adopt(tbody);
+            
+            document.getElement('#output').adopt(table);
+            document.getElement('#key').set('width', table.getSize().x);  
+          }
+          break;
+          
+          // 2 Sided Packages
+          case 'xSOIC':
+          case 'xDIP' :
+          {  
+            var numColsEachSide = 5  // PRC ... Interrupt
+                                + 3; // Peripherals
+            
+      
+            var rows = [ ];            
+            for(var i = 1; i <= chip.Pins/2; i++)
+            { 
+              var row = new Element('tr');
+              
+              // Left Side, from outside to inside
+              row.adopt(drawPinLabels(i, chip.Interrupt, 'INT').addClass('Interrupt'));
+              
+              (new Hash(chip.Peripherals)).each(function(pPins, periphName){
+                drawPinLabels(i,pPins).addClass(periphName).inject(row.firstChild, 'after');
+              });              
+                            
+              row.adopt(drawPinLabels(i, chip.Analog, 'A').addClass('Analog'));
+              row.adopt(drawPinLabels(i, chip.Digital).addClass('Digital'));
+              row.adopt(drawPinLabels(i, chip.PWM, '~').addClass('PWM'));
+              row.adopt(drawPinLabels(i, chip.PRC).addClass('PRC'));
+              
+              if(row.getElement('td.pin'+i+' span.Reset, td.pin'+i+' span.XTAL1, td.pin'+i+' span.XTAL2'))
+              {
+                row.getElements('td.pin'+i).each(function(j){ if(!j.getElement('.Reset,.XTAL1,.XTAL2'))  j.addClass('Obscured');});
+              }
+              
+              row.adopt((new Element('td')).addClass('leg left').adopt((new Element('span')).set('text', i)));
+                            
+              // Right side
+              row.adopt((new Element('td')).addClass('leg right').adopt((new Element('span')).set('text', chip.Pins+1-i)));
+  
+              row.adopt(drawPinLabels(chip.Pins+1-i, chip.PRC).addClass('PRC'));
+              row.adopt(drawPinLabels(chip.Pins+1-i, chip.PWM, '~').addClass('PWM'));
+              row.adopt(drawPinLabels(chip.Pins+1-i, chip.Digital).addClass('Digital'));
+              row.adopt(drawPinLabels(chip.Pins+1-i, chip.Analog, 'A').addClass('Analog'));
+              
+              (new Hash(chip.Peripherals)).each(function(pPins, periphName){
+                row.adopt(drawPinLabels(chip.Pins+1-i,pPins).addClass(periphName));
+              });
+
+              row.adopt(drawPinLabels(chip.Pins+1-i, chip.Interrupt, 'INT').addClass('Interrupt'));
+              if(row.getElement('td.pin'+(chip.Pins+1-i)+' span.Reset, td.pin'+(chip.Pins+1-i)+' span.XTAL1, td.pin'+(chip.Pins+1-i)+' span.XTAL2'))
+              {
+                row.getElements('td.pin'+(chip.Pins+1-i)).each(function(j){ if(!j.getElement('.Reset,.XTAL1,.XTAL2')) j.addClass('Obscured');});
+              }
+              rows[rows.length] = row;
+            }
+            
+            var tbody = new Element('tbody');
+            
+            // Above Pins
+            var tr = new Element('tr');
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            tr.adopt((new Element('td', {rowSpan: rows.length+2})).addClass(chip.Package + '-Outline').set('text', chip.Name));
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            
+            // Pins Themselves
+            tbody.adopt(tr);
+            for(var i = 0; i < rows.length; i++)
+            {
+              tbody.adopt(rows[i]);
+            }
+            
+            // Below Pins
+            var tr = new Element('tr');
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));          
+            tr.adopt((new Element('td', {colSpan: rows[0].getElements('td').length/2})));
+            
+            var table = (new Element('table')).addClass('pinout');
+            table.adopt(tbody);
+            
+            document.getElement('#output').adopt(table);
+            document.getElement('#key').set('width', table.getSize().x); 
+          }
+          break;
+        }
+      }
+      
+      //document.addEvent('domready', function(){ drawChip(atmega328qfn); });
+      
+      document.addEvent('domready', function(){
+        templates.each(function(t,x){
+          document.getElement('#templatePicker').options[document.getElement('#templatePicker').options.length] = new Option(
+            t.Name,
+            x
+          );
+        });
+        
+        document.getElement('#templatePicker').addEvent('change', function(){
+          document.getElement('#templateJSON').value = JSON.stringify(templates[document.getElement('#templatePicker').options[document.getElement('#templatePicker').selectedIndex].value], null, 2);
+        });
+        
+        document.getElement('#drawButton').addEvent('click', function(){
+          document.getElement('#output').empty().setStyle('margin',0);
+          var j = JSON.decode(document.getElement('#templateJSON').value);          
+          drawChip(j);
+          
+          if(j.Package == '4SIDED')
+          {
+            document.getElement('#OffsetTop').value = document.getElement('#VTable').getStyle('top').replace(/px/, '');
+            document.getElement('#OffsetLeft').value = document.getElement('#VTable').getStyle('left').replace(/px/, '');
+            document.getElement('#MarginTop').value = document.getElement('#output').getStyle('margin-top').replace(/px/, '');
+            document.getElement('#MarginBottom').value = document.getElement('#output').getStyle('margin-bottom').replace(/px/, '');
+          }
+        });
+        
+        function saveOffsetsAndMargins()
+        {
+          if(document.getElement('#templateJSON').value)
+          {
+            var j = JSON.decode(document.getElement('#templateJSON').value);
+            j.VerticalPinsOffset = {
+              top:        document.getElement('#OffsetTop').value.length ? document.getElement('#OffsetTop').value : null,
+              left:       document.getElement('#OffsetLeft').value       ? document.getElement('#OffsetLeft').value : null          
+            };
+            
+            j.VerticalPinsMargin = {
+              top:        document.getElement('#MarginTop').value ? document.getElement('#MarginTop').value : null,
+              bottom:     document.getElement('#MarginBottom').value ? document.getElement('#MarginBottom').value  : null           
+            }
+            document.getElement('#templateJSON').value = JSON.stringify(j, null, 2);
+          }
+        }
+        
+        document.getElement('#OffsetTop').addEvent('change', function(){
+          if(document.getElement('#VTable'))
+          {
+            document.getElement('#VTable').setStyle('top', document.getElement('#OffsetTop').value);
+            saveOffsetsAndMargins();
+          }
+        });
+        
+        document.getElement('#OffsetLeft').addEvent('change', function(){
+          if(document.getElement('#VTable'))
+          {
+            document.getElement('#VTable').setStyle('left', document.getElement('#OffsetLeft').value);
+            saveOffsetsAndMargins();
+          }
+        });
+        
+        document.getElement('#MarginTop').addEvent('change', function(){
+          if(document.getElement('#VTable'))
+          {
+            document.getElement('#output').setStyle('margin-top', document.getElement('#MarginTop').value);
+            saveOffsetsAndMargins();
+          }
+        });
+        
+        document.getElement('#MarginBottom').addEvent('change', function(){
+          if(document.getElement('#VTable'))
+          {
+            document.getElement('#output').setStyle('margin-bottom', document.getElement('#MarginBottom').value);
+            saveOffsetsAndMargins();
+          }
+        });
+        
+        
+      });
+      
+    </script>
+    
+    <style type="text/css">
+      body 
+      {
+        font-family: Tahoma;
+      }
+            
+      /* A border surrounding the diagram and key */
+      #border { display:inline-block; border:1px solid black; padding:10px; }
+      
+      #key .Peripherals div { float:left; width:25%; }
+      #key .Peripherals span { margin-left:3px; margin-right:3px; }
+      #key .Peripherals div:first-child span  { margin-left:0px; }
+      #key .Peripherals div:last-child span   { margin-right:0px; }
+      
+      
+      /* The body of the IC */
+      table.pinout { border-collapse:collapse; }
+      .css-2SIDED-outline { width:150px; }
+      .DIP-outline, .ic-body
+      {
+        border:3px outset black; padding:10px;
+        vertical-align:middle; text-align:center;
+        background-color:#333;
+        color:white;
+        font-weight:bold;
+      }
+      
+      /* The legs of the IC  */
+      .leg { font-size:smaller;     margin:0px;  }
+      .leg.left  { text-align:right; padding-right:0px; padding-left:10px;}
+      .leg.right { text-align:left;  padding-left:0px;  padding-right:10px; }
+      .leg span { display:block; padding-left:5px; padding-right:5px;  background-color:#ccc; color:#888; }
+      
+      /*.pinout .pin { width:4em; }*/
+      .pinout .leg { width:2em; }
+      
+      /* The general appearance of a label. */
+      .pin span { display:block; border-radius: 3px; border: 1px solid black; padding:3px; text-align:center; }
+      
+      /* Power, Reset, Xtal Labels */
+      .pin.PRC { width:4em; }
+      .pin.PRC span.Vcc     { background-color:#ad3303; color:white; }
+      .pin.PRC span.AVcc     { background-color:#ad3303; color:white; }
+      .pin.PRC span.Gnd     { background-color:black;   color:white; }
+      .pin.PRC span.Reset   { background-color:#FF9933;   color:black; }      
+      .pin.PRC span.Interrupt, .pin.Interrupt span { background-color:#FFCC6F; color:black; }
+      
+      /* "Obscured" labels (where the usual function, eg RESET makes other functions unavailable) */
+      .pin.Obscured { opacity:0.7; }
+      tr:hover .pin.Obscured { opacity:1; }
+          
+      /* PWM Labels */
+      .pin.PWM { width:1ex; }
+      
+      /* Digital and Analog Labels */
+      .pinout .pin.Digital, .pinout .pin.Analog { width:2em; }
+      .pin.Digital span, .pin.PWM span { background-color:#547FA9; color:white; }
+      .pin.Analog span  { background-color:#62794F; color:white; }      
+           
+      /* Peripheral Labels */
+      .pin.Serial span  { background-color:#9999FF; color:black; }
+      .pin.SPI    span  { background-color:#FFCCFF; color:black; }
+      .pin.I2C    span  { background-color:#bff2cd; color:black; }
+      
+      .leg.top, .leg.bottom { text-align:center; }
+      .leg.top span, .leg.bottom span { width:1em; margin-left:auto; margin-right:auto; }
+            
+       
+      .top>div { transform: translate(0px, -3px) rotate(270deg); }
+      .pinout .top.pin, .pinout .top.leg { width:3em; }
+      .top.pin.PRC { height:4em;  }
+      .top.pin.PWM { height:1em;  } .top.pin.PWM span { width: 1em; margin-left: auto; margin-right: 5px; }
+      .top.pin.Digital { height:4em;  }
+      .top.pin.Analog { height:4em;  }
+      .top.pin.Serial { height:4em;  }
+      .top.pin.SPI  { height:4em;  }
+      .top.pin.I2C  { height:4em;  }
+      .top.pin.Interrupt { height:4em; }
+      
+      .bottom>div { transform: translate(0px, 3px) rotate(90deg); }
+      .pinout .bottom.pin, .pinout .bottom.leg { width:3em; }
+      .bottom.pin.PRC { height:4em;  }
+      .bottom.pin.PWM { height:1em;  } .bottom.pin.PWM span { width: 1em; margin-left: auto; margin-right: 5px; }
+      .bottom.pin.Digital { height:4em;  }
+      .bottom.pin.Analog { height:4em;  }
+      .bottom.pin.Serial { height:4em;  }
+      .bottom.pin.SPI  { height:4em;  }
+      .bottom.pin.I2C  { height:4em;  }
+      .bottom.pin.Interrupt { height:4em; }
+      
+    </style>
+    
+  </head>
+  <body>
+    <div id="controls">
+      <h1>James' Dodgy Arduino-Oriented Pinout Maker For Microcontrollers</h1>
+      <p>
+        <strong>Step 1.</strong> Select template from drop down.  Edit as required.  Click the button.        
+      </p>
+      
+      <p>
+        <strong>Step 2.</strong> Adjust the position of the vertical pins and margins so they are correct.
+      </p>
+      <p>
+        <strong>Step 3.</strong> Screenshot or print-to-pdf or whatever and adjust further in your favourite graphics package.
+      </p>
+      
+      <p>
+      <select id="templatePicker">
+        <option value="0">Select Template</option>
+      </select><br />
+      <textarea id="templateJSON" rows="10" cols="50"></textarea>
+      <input type="button" id="drawButton" value="Draw It" />
+      </p>
+      
+      <table>
+        <tr>
+          <th>Vertical Pins Offset:</th>
+          <td>top: <input type="number" id="OffsetTop" style="width:3em"/>, left: <input type="number" id="OffsetLeft" style="width:3em"/></td>
+        </tr>
+        <tr>
+          <th>Vertical Pins Margins:</th>
+          <td>top: <input type="number" id="MarginTop" style="width:3em"/>, bottom: <input type="number" id="MarginBottom" style="width:3em"/></td>
+        </tr>
+        
+      </table>
+      
+    <div>
+    
+    <div id="border">
+    <div id="output"></div>
+
+    <table id="key">
+      <tr>
+        <td>0..n, ~</td> <td class="pin Digital"><span>digitalWrite(), digitalRead(), pinMode(), ~analogWrite()</span></td>
+      </tr>
+      <tr>
+        <td>A0..An</td><td class="pin Analog"><span>analogRead()</span></td>        
+      </tr>
+      <tr>
+        <td colspan="2" class="Peripherals">
+          <div class="pin Serial"><span>Serial</span></div> 
+          <div class="pin SPI"><span>SPI</span></div>
+          <div class="pin I2C"><span>I2C</span></div>
+          <div class="pin Interrupt"><span>Interrupt</span></div>          
+        </td>        
+      </tr>
+    </table>
+    </div>
+    
+  </body>
+</html>
