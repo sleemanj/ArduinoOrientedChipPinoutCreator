@@ -167,6 +167,34 @@ var templates = [
             I2C    : {SDA:  23,           SCL: 24}
           }        
           
+        },
+      
+            
+        {
+          Name   : 'ATtiny828',
+          Package: '4SIDED'  ,
+          Pins   :  32     ,
+          
+          PRC    :   { Vcc:[4], AVcc: 18, Gnd:[5,21], Reset: 29, CLKI: 6, Interrupt: [32,1]}, // Closest labels to chip
+          PWM    :   [3,6,7,31],
+          Digital:   [9,10,11,12,13,14,15,16,17,19,20,22,23,24,25,26,27,28,29,30,31,32], 
+          Analog :   [9,10,11,12,13,14,15,16,17,19,20,22,23,24,25,26,31,32,1,2,3,6,7,8,27,28,29,30],
+          
+          Peripherals: 
+          {
+            Serial : {TX:   2,  RX: 1},
+            SPI    : {MOSI: 27, MISO: 28, SCK: 30, SS: 31},
+            I2C    : {SDA:  27,           SCL: 30}
+          },       
+          
+          "VerticalPinsOffset": {
+            "top": "-52",
+            "left": "-7"
+          },
+          "VerticalPinsMargin": {
+            "top": "290",
+            "bottom": "256"
+          }
         }
 
   
