@@ -71,7 +71,24 @@ var templates = [
           
         },
         
-
+        {
+          Name   : 'ATtiny 24/44/84 A0=D10 Variant',
+          Package: '2SIDED'  ,
+          Pins   :  14     ,
+          
+          PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [8]},
+          PWM    :   [5,6,7,8],
+          Digital:   [2,3,5,6,7,8,9,10,11,12,13,4], 
+          Analog :   [13,12,11,10,9,8,7,6],
+          
+          Peripherals: 
+          {
+            Serial : {TX:   12,  RX: 11},
+            SPI    : {MOSI: 7, MISO: 8, SCK: 9},
+            I2C    : {SDA:  7,          SCL: 9}
+          }        
+          
+        },
         {
           Name   : 'ATtiny 25/45/85',
           Package: '2SIDED'  ,
