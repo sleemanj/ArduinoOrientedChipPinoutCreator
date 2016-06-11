@@ -73,9 +73,11 @@
           });              
           row.getElement('td').destroy();
           
-          row.adopt(drawPinLabels(i, chip.Analog, 'A').addClass('Analog'));
-          row.adopt(drawPinLabels(i, chip.Digital).addClass('Digital'));
-          row.adopt(drawPinLabels(i, chip.PWM, '~').addClass('PWM'));
+          if(chip.Analog.length)
+            row.adopt(drawPinLabels(i, chip.Analog, 'A').addClass('Analog'));
+          
+          row.adopt(drawPinLabels(i, chip.Digital).addClass('Digital'));        
+          row.adopt(drawPinLabels(i, chip.PWM, '~').addClass('PWM'));            
           row.adopt(drawPinLabels(i, chip.PRC).addClass('PRC'));
           
           if(row.getElement('td.pin'+i+' span.Reset, td.pin'+i+' span.XTAL1, td.pin'+i+' span.XTAL2'))
@@ -398,6 +400,24 @@
           var j = JSON.decode(document.getElement('#templateJSON').value);          
           drawChip(j);
           
+          if(!j.Peripherals.SPI && j.Peripherals.TPI)
+          {
+            document.getElement('#key .pin.SPI span').set('text', 'TPI');
+          }
+          else
+          {
+            document.getElement('#key .pin.SPI span').set('text', 'SPI');
+          }
+          
+          if(!j.Analog.length)
+          {
+            document.getElement('#key .Analog').getParent('tr').style.display = 'none';
+          }
+          else
+          {
+            document.getElement('#key .Analog').getParent('tr').style.display = '';
+          }
+          
           if(j.Package == '4SIDED')
           {
             document.getElement('#OffsetTop').value = document.getElement('#VTable').getStyle('top').replace(/px/, '');
@@ -523,7 +543,7 @@
            
       /* Peripheral Labels */
       .pin.Serial span  { background-color:#9999FF; color:black; }
-      .pin.SPI    span  { background-color:#FFCCFF; color:black; }
+      .pin.SPI    span, .pin.TPI    span  { background-color:#FFCCFF; color:black; }
       .pin.I2C    span  { background-color:#bff2cd; color:black; }
       
       .leg.top, .leg.bottom { text-align:center; }

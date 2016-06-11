@@ -51,7 +51,99 @@ var templates = [
           
         },
       
+        {
+          Name   : 'ATtiny 5/10', // A label for the IC
+          Package: '2SIDED'  , // 2SIDED or 4SIDED
+          Pins   :  6     ,    // Total number of pins in the package
+          
+          // PRC (Power Reset Clock) are the labels closest to the IC
+          // If a label should be applied to more that one pin, use an 
+          // array...
+          //  Vcc: [1,2,3]
+          // Interrupt is a special case and will be labelled as 
+          // INTx where x is the index of the pin in the array
+          // eg Interrupt: [6,9] 
+          //    means pin 6 gets labelled INT0 and 9 as INT1
+          //
+          // Reset, XTAL1 and XTAL2 if present will cause 
+          // other labels on that pin to be semi-transparent to show
+          // that those functions are typically not available 
+          // due to use of reset or crystals.
+          PRC    :   { Vcc:5, Gnd:2, Reset: 6, CLKI: 3, Interrupt: [4]},
+          
+          // Pins which can handle PWM functions (Timer Controlled Outputs)
+          // these are labelled with a tilde ~
+          PWM    :   [1,3],
+          
+          // Digital Input/Output Pins
+          // These get labeled as the index in the array, eg
+          //   Digital: [3,4,5] 
+          // marks pin 3 as "0", pin 4 as "1" and pin 5 as "2"
+          Digital:   [1,3,4,6],              
+          
+          // Analog Input/Output Pins
+          // These get labelled as An where n is the index in the array
+          //   Analog: [3,4,5] 
+          // marks pin 3 as "A0", pin 4 as "A1" and pin 5 as "A2"
+          Analog :   [1,3,4,6],                 
+          
+          // Other categries of pins, the labels you use here are 
+          // arbitrary, Serial, SPI and I2C will get coloured labels
+          // others are just white.          
+          Peripherals: 
+          {
+            Serial : {TX:   1,   RX: 3},
+            TPI    : {DATA: 1,   CLK: 3},
+          }        
+          
+        },
         
+        {
+          Name   : 'ATtiny 4/9', // A label for the IC
+          Package: '2SIDED'  , // 2SIDED or 4SIDED
+          Pins   :  6     ,    // Total number of pins in the package
+          
+          // PRC (Power Reset Clock) are the labels closest to the IC
+          // If a label should be applied to more that one pin, use an 
+          // array...
+          //  Vcc: [1,2,3]
+          // Interrupt is a special case and will be labelled as 
+          // INTx where x is the index of the pin in the array
+          // eg Interrupt: [6,9] 
+          //    means pin 6 gets labelled INT0 and 9 as INT1
+          //
+          // Reset, XTAL1 and XTAL2 if present will cause 
+          // other labels on that pin to be semi-transparent to show
+          // that those functions are typically not available 
+          // due to use of reset or crystals.
+          PRC    :   { Vcc:5, Gnd:2, Reset: 6, CLKI: 3, Interrupt: [4]},
+          
+          // Pins which can handle PWM functions (Timer Controlled Outputs)
+          // these are labelled with a tilde ~
+          PWM    :   [1,3],
+          
+          // Digital Input/Output Pins
+          // These get labeled as the index in the array, eg
+          //   Digital: [3,4,5] 
+          // marks pin 3 as "0", pin 4 as "1" and pin 5 as "2"
+          Digital:   [1,3,4,6],              
+          
+          // Analog Input/Output Pins
+          // These get labelled as An where n is the index in the array
+          //   Analog: [3,4,5] 
+          // marks pin 3 as "A0", pin 4 as "A1" and pin 5 as "A2"
+          Analog :   [],                 
+          
+          // Other categries of pins, the labels you use here are 
+          // arbitrary, Serial, SPI and I2C will get coloured labels
+          // others are just white.          
+          Peripherals: 
+          {
+            Serial : {TX:   1,   RX: 3},
+            TPI    : {DATA: 1,   CLK: 3},
+          }        
+          
+        },
         {
           Name   : 'ATtiny 24/44/84',
           Package: '2SIDED'  ,
