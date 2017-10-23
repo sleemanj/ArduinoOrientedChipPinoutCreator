@@ -7,6 +7,7 @@ var templates = [
           Name   : 'ATtiny13', // A label for the IC
           Package: '2SIDED'  , // 2SIDED or 4SIDED
           Pins   :  8     ,    // Total number of pins in the package
+          Programmer: 'ISP', 
           
           // PRC (Power Reset Clock) are the labels closest to the IC
           // If a label should be applied to more that one pin, use an 
@@ -45,8 +46,8 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   5,   RX: 6},
-            SPI    : {MOSI: 5, MISO: 6, SCK: 7},
-            I2C    : {SDA:  6,          SCL: 7}
+            Programmer    : {MOSI: 5, MISO: 6, SCK: 7},
+           // I2C    : {SDA:  6,          SCL: 7}
           }        
           
         },
@@ -55,6 +56,7 @@ var templates = [
           Name   : 'ATtiny 5/10', // A label for the IC
           Package: '2SIDED'  , // 2SIDED or 4SIDED
           Pins   :  6     ,    // Total number of pins in the package
+          Programmer: 'TPI',
           
           // PRC (Power Reset Clock) are the labels closest to the IC
           // If a label should be applied to more that one pin, use an 
@@ -93,7 +95,7 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   1,   RX: 3},
-            TPI    : {DATA: 1,   CLK: 3},
+            Programmer    : {DATA: 1,   CLK: 3},
           }        
           
         },
@@ -102,6 +104,7 @@ var templates = [
           Name   : 'ATtiny 4/9', // A label for the IC
           Package: '2SIDED'  , // 2SIDED or 4SIDED
           Pins   :  6     ,    // Total number of pins in the package
+          Programmer: 'TPI',
           
           // PRC (Power Reset Clock) are the labels closest to the IC
           // If a label should be applied to more that one pin, use an 
@@ -140,7 +143,7 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   1,   RX: 3},
-            TPI    : {DATA: 1,   CLK: 3},
+            Programmer    : {DATA: 1,   CLK: 3},
           }        
           
         },
@@ -148,6 +151,7 @@ var templates = [
           Name   : 'ATtiny 24/44/84',
           Package: '2SIDED'  ,
           Pins   :  14     ,
+          Programmer: 'ISP',
           
           PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [8]},
           PWM    :   [5,6,7,8],
@@ -157,7 +161,8 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   12,  RX: 11},
-            SPI    : {MOSI: 7, MISO: 8, SCK: 9},
+            Programmer    : {MOSI: 7, MISO: 8, SCK: 9},
+            SPI    : {MOSI: 8, MISO: 7, SCK: 9},
             I2C    : {SDA:  7,          SCL: 9}
           }        
           
@@ -167,6 +172,7 @@ var templates = [
           Name   : 'ATtiny 24/44/84 A0=D10 Variant',
           Package: '2SIDED'  ,
           Pins   :  14     ,
+          Programmer: 'ISP',
           
           PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [8]},
           PWM    :   [5,6,7,8],
@@ -176,7 +182,8 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   12,  RX: 11},
-            SPI    : {MOSI: 7, MISO: 8, SCK: 9},
+            Programmer    : {MOSI: 7, MISO: 8, SCK: 9},
+            SPI    : {MOSI: 8, MISO: 7, SCK: 9},
             I2C    : {SDA:  7,          SCL: 9}
           }        
           
@@ -185,6 +192,7 @@ var templates = [
           Name   : 'ATtiny 25/45/85',
           Package: '2SIDED'  ,
           Pins   :  8     ,
+          Programmer: 'ISP',
           
           PRC    :   { Vcc:8, Gnd:4, Reset: 1, XTAL1: 2, XTAL2: 3, Interrupt: [6]}, // PRC = Power, Reset and Clock
           PWM    :   [5,6,3],
@@ -194,7 +202,8 @@ var templates = [
           Peripherals: 
           {
             Serial : {TX:   5,   RX: 6},
-            SPI    : {MOSI: 5, MISO: 6, SCK: 7},
+            Programmer    : {MOSI: 5, MISO: 6, SCK: 7},
+            SPI    : {MOSI: 6, MISO: 5, SCK: 7},
             I2C    : {SDA:  5,          SCL: 7}
           }        
           

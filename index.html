@@ -400,14 +400,73 @@
           var j = JSON.decode(document.getElement('#templateJSON').value);          
           drawChip(j);
           
+          var numPeripherals = 0;
+          
           if(!j.Peripherals.SPI && j.Peripherals.TPI)
           {
-            document.getElement('#key .pin.SPI span').set('text', 'TPI');
+            document.getElement('#key .pin.SPI span').set('text', 'TPI').setStyle('display','block');
+          }
+          else if(!j.Peripherals.SPI)
+          {
+            document.getElement('#key .pin.SPI span').set('text', '').setStyle('display','none');
           }
           else
           {
-            document.getElement('#key .pin.SPI span').set('text', 'SPI');
+            document.getElement('#key .pin.SPI span').set('text', 'SPI').setStyle('display','block');
+            numPeripherals++;
           }
+          
+          if(!j.Peripherals.I2C)
+          {
+            document.getElement('#key .pin.I2C span').setStyle('display','none');
+          }
+          else
+          {
+            document.getElement('#key .pin.I2C span').setStyle('display','block');
+            numPeripherals++;
+          }
+          
+          if(!j.Peripherals.Programmer)
+          {
+            document.getElement('#key .pin.Programmer').style.display = 'none';
+          }
+          else
+          {
+            document.getElement('#key .pin.Programmer').style.display = 'block';
+            if(j.Programmer)
+            {
+              document.getElement('#key .pin.Programmer span').set('text', 'Programmer ('+j.Programmer+')');
+            }
+            else
+            {
+              document.getElement('#key .pin.Programmer span').set('text', 'Programmer');
+            }
+            numPeripherals++;
+          }
+          
+          if(!j.Peripherals.Serial)
+          {
+            document.getElement('#key .pin.Serial span').setStyle('display','none');
+          }
+          else
+          {
+            document.getElement('#key .pin.Serial span').setStyle('display','block');
+            numPeripherals++;
+          }
+          
+          if(!j.PRC.Interrupt.length)
+          {
+            document.getElement('#key .pin.Interrupt span').setStyle('display','none');
+          }
+          else
+          {
+            document.getElement('#key .pin.Interrupt span').setStyle('display','block');
+            numPeripherals++;
+          }
+          
+          document.getElement('#key .Peripherals').className = document.getElement('#key .Peripherals').className.replace(/has[0-9]/, '');
+          document.getElement('#key .Peripherals').addClass('has'+numPeripherals);
+          
           
           if(!j.Analog.length)
           {
@@ -493,9 +552,33 @@
       
       #key .Peripherals div { float:left; width:25%; }
       #key .Peripherals span { margin-left:3px; margin-right:3px; }
-      #key .Peripherals div:first-child span  { margin-left:0px; }
+      #key .Peripherals div:nth-child(2) span  { margin-left:0px; }
       #key .Peripherals div:last-child span   { margin-right:0px; }
+            
       
+      #key .Peripherals.has3 div
+      {
+        width:50%;
+      }
+            
+      #key .Peripherals.has4 div
+      {
+        width:33.3%;
+      }
+      
+      #key .Peripherals div.Programmer 
+      {
+        float: none;
+        width: auto;
+        clear: both;        
+        margin-bottom:2px;
+      }
+      
+      #key .Peripherals .Programmer span
+      {
+        margin-left:0px;
+        margin-right:0px;
+      }
       
       /* The body of the IC */
       table.pinout { border-collapse:collapse; }
@@ -542,6 +625,7 @@
       .pin.Analog span  { background-color:#62794F; color:white; }      
            
       /* Peripheral Labels */
+      .pin.Programmer span  { background-color:#fffb4d; color:black; }
       .pin.Serial span  { background-color:#9999FF; color:black; }
       .pin.SPI    span, .pin.TPI    span  { background-color:#FFCCFF; color:black; }
       .pin.I2C    span  { background-color:#bff2cd; color:black; }
@@ -622,9 +706,10 @@
         <td>A0..An</td><td class="pin Analog"><span>analogRead()</span></td>        
       </tr>
       <tr>
-        <td colspan="2" class="Peripherals">
+        <td colspan="2" class="Peripherals">          
+          <div class="pin Programmer"><span>Programmer</span></div>
           <div class="pin Serial"><span>Serial</span></div> 
-          <div class="pin SPI"><span>SPI</span></div>
+          <div class="pin SPI"><span>SPI</span></div>          
           <div class="pin I2C"><span>I2C</span></div>
           <div class="pin Interrupt"><span>Interrupt</span></div>          
         </td>        
