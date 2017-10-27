@@ -224,7 +224,7 @@ var templates = [
           {
             Serial : {TX:   3,  RX: 2},
             SPI    : {MOSI: 17, MISO: 18, SCK: 19},
-            I2C    : {SDA:  27,           SCL: 26}
+            I2C    : {SDA:  27,           SCL: 28}
           }        
           
         },
