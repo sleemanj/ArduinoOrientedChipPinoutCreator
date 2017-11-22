@@ -236,7 +236,7 @@ var templates = [
           Pins   :  32     ,
           
           PRC    :   { Vcc:[4,6,], AVcc: 18, Gnd:[3,5,21], Reset: 29, XTAL1: 7, XTAL2: 8, AREF:20, Interrupt: [32,1]}, // PRC = Power, Reset and Clock
-          PWM    :   [1,9,10,13,15],
+          PWM    :   [1,9,10,13,14,15],
           Digital:   [30,31,32,1,2,9,10,11,12,13,14,15,16,17,23,24,25,26,27,28], 
           Analog :   [23,24,25,26,27,28,19,22],
           
