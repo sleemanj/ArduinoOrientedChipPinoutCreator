@@ -17,4 +17,4 @@ Examples
 ![ATTiny13 Example](https://cdn.rawgit.com/sleemanj/ArduinoOrientedChipPinoutCreator/master/13.jpg)
 
 ### ATMega328 QFP/MLF32
-![ATMega328 Example](https://cdn.rawgit.com/sleemanj/ArduinoOrientedChipPinoutCreator/master/328.jpg)
+![ATMega328 Example](https://rawgit.com/sleemanj/ArduinoOrientedChipPinoutCreator/master/328.png)
