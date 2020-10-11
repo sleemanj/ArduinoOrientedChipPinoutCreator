@@ -153,7 +153,7 @@ var templates = [
           Pins   :  14     ,
           Programmer: 'ISP',
           
-          PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [8]},
+          PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [5]},
           PWM    :   [5,6,7,8],
           Digital:   [13,12,11,10,9,8,7,6,5,3,2,4], 
           Analog :   [13,12,11,10,9,8,7,6],
@@ -174,7 +174,7 @@ var templates = [
           Pins   :  14     ,
           Programmer: 'ISP',
           
-          PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [8]},
+          PRC    :   { Vcc:1, Gnd:14, Reset: 4, XTAL1: 2, XTAL2: 3, Interrupt: [5]},
           PWM    :   [5,6,7,8],
           Digital:   [2,3,5,6,7,8,9,10,11,12,13,4], 
           Analog :   [13,12,11,10,9,8,7,6],
@@ -194,7 +194,7 @@ var templates = [
           Pins   :  8     ,
           Programmer: 'ISP',
           
-          PRC    :   { Vcc:8, Gnd:4, Reset: 1, XTAL1: 2, XTAL2: 3, Interrupt: [6]}, // PRC = Power, Reset and Clock
+          PRC    :   { Vcc:8, Gnd:4, Reset: 1, XTAL1: 2, XTAL2: 3, Interrupt: [7]}, // PRC = Power, Reset and Clock
           PWM    :   [5,6,3],
           Digital:   [5,6,7,2,3,1], 
           Analog :   [1,7,3,2],
